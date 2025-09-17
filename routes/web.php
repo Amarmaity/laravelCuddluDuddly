@@ -9,13 +9,18 @@ use App\Http\Controllers\Admin\CustomerController;
 Route::get('/', function () {
     return view('home');
 });
+Route::get('/user/{id}',[CustomerController::class,'home'])->name('home');
 Route::get('/admin', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
 Route::post('admin-login', [AdminController::class, 'login'])->name('admin-login');
 Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('admin/customer',[CustomerController::class, 'index'])->name('customer-management');
 Route::get('regsister-customer', [CustomerController::class,'registerView'])->name('customer-register');
-Route::post('register/',[CustomerController::class, 'registration'])->name('store-customer');
+Route::post('register-customer',[CustomerController::class, 'store'])->name('store-customer');
+Route::get('customer-login', [CustomerController::class, 'customerLogin'])->name('login-customer'); //View
+Route::post('login-web', [CustomerController::class, 'loginweb'])->name('login');
+Route::post('logout-web', [CustomerController::class, 'logoutWeb'])->name('logout-web');
+
 
 // Sellers
 Route::prefix('admin')->group(function () {
