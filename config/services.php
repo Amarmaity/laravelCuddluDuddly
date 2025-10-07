@@ -13,6 +13,13 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    'gst' => [
+        'client_id' => env('GST_CLIENT_ID'),
+        'client_secret' => env('GST_CLIENT_SECRET'),
+    ],
+    'pan' => [
+        'api_key' => env('PAN_API_KEY'),
+    ],
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
@@ -34,5 +41,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'razorpay' => [
+        'key_id'     => env('RAZORPAY_KEY_ID'),
+        'key_secret' => env('RAZORPAY_KEY_SECRET'),
+		'account_number' => env('RAZORPAY_ACCOUNT_NUMBER'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
+    ]
 
 ];

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MasterCategory extends Model
 {
     use HasFactory;
+    public $timestamps = false;   // 👈 ADD THIS
 
     protected $fillable = [
         'name',
@@ -35,6 +36,6 @@ class MasterCategory extends Model
             'master_category_sections',
             'master_category_id',
             'section_type_id'
-        );
+        )->distinct(); // 👈 this will ensure unique section types
     }
 }

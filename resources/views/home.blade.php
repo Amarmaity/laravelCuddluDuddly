@@ -1,4 +1,4 @@
-@extends('layouts.masterLayout')
+@extends('customer/layouts.masterLayout')
 
 @section('title', 'CuddlyDuddly-Home ')
 

@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Admin Dashboard')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -125,12 +125,33 @@
 
         {{-- Main Content --}}
         <main class="mt-4">
+
+
+            <!-- Success Alert -->
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <!-- Error Alert -->
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+
             @yield('content')
+
         </main>
 
         {{-- Footer --}}
         @include('admin.layouts.footer')
     </div>
+    {{-- @include('admin.components.alerts') --}}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -141,6 +162,7 @@
     </script>
     @stack('styles')
     @stack('scripts')
+    @include('admin.partials.universal-delete-modal')
 </body>
 
 </html>

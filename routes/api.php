@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\Admin\CustomerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ValidationController;
 
-Route::post('/register', [CustomerController::class, 'apiRegister']);
-Route::post('/loginapi', [CustomerController::class, 'loginApi']);
-Route::post('/logout',[CustomerController::class, 'logoutApi']);
+Route::prefix('validate')->group(function () {
+    Route::get('/gst/{gst}', [ValidationController::class, 'validateGST']);
+    Route::get('/pan/{pan}', [ValidationController::class, 'validatePAN']);
+});

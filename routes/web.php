@@ -5,29 +5,34 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\SellerController;
+use App\Http\Controllers\Admin\PayoutController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReviewController;
 
 Route::get('/', function () {
-    return view('home');
+    return view('welcome');
 });
-Route::get('/user/{id}',[CustomerController::class,'home'])->name('home');
 Route::get('/admin', [AdminController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
 Route::post('admin-login', [AdminController::class, 'login'])->name('admin-login');
 Route::get('admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-Route::get('admin/customer',[CustomerController::class, 'index'])->name('customer-management');
-Route::get('regsister-customer', [CustomerController::class,'registerView'])->name('customer-register');
-Route::post('register-customer',[CustomerController::class, 'store'])->name('store-customer');
-Route::get('customer-login', [CustomerController::class, 'customerLogin'])->name('login-customer'); //View
-Route::post('login-web', [CustomerController::class, 'loginweb'])->name('login');
-Route::post('logout-web', [CustomerController::class, 'logoutWeb'])->name('logout-web');
 
 
 // Sellers
 Route::prefix('admin')->group(function () {
-    Route::resource('sellers', SellerController::class)->names('admin.sellers'); // index, create, store, show, edit, update, destroy
-    Route::get('seller-applications', [SellerController::class, 'index'])->name('admin.seller-applications.index');
-    Route::get('payouts', [PayoutController::class, 'index'])->name('admin.payouts.index');
-    Route::get('sellers/compliance', [SellerController::class, 'compliance'])->name('admin.sellers.compliance');
+    Route::resource('sellers', SellerController::class)->names('admin.sellers');
+    Route::get('all-sellers', [SellerController::class, 'AllSellers'])->name('admin.allsellers.all-sellers');
+    Route::get('seller-applications', [SellerController::class, 'create'])->name('admin.seller-applications.index');
+    Route::get('seller-applications/{seller}/download-docs', [SellerController::class, 'viewDocs'])->name('admin.seller-applications.viewDocs');
+
+    Route::get('seller-compliance', [SellerController::class, 'compliance'])->name('admin.sellers.compliance');
+    Route::patch('seller-compliance/{seller}/accept', [SellerController::class, 'KYCaccept'])->name('admin.sellers.compliance.accept');
+    Route::patch('seller-compliance/{seller}/reject', [SellerController::class, 'KYCreject'])->name('admin.sellers.compliance.reject');
+    
+    Route::get('sellers/bank-details/{seller}', [SellerController::class, 'bankDetails'])->name('admin.sellers.bankDetails');
+    Route::resource('payouts', PayoutController::class)->names('admin.payouts');
+    Route::post('webhooks/razorpayx', [\App\Http\Controllers\Admin\WebhookController::class, 'razorpayx'])->name('admin.webhooks.razorpayx');
 
     // Products
     Route::resource('products', ProductController::class)->names('admin.products');
@@ -44,7 +49,15 @@ Route::prefix('admin')->group(function () {
     Route::resource('cancellations', CancellationController::class)->names('admin.cancellations');
 
     // Customers
+    // Resource (default CRUD)
     Route::resource('customers', CustomerController::class)->names('admin.customers');
+    Route::post('customers/bulk-delete', [CustomerController::class, 'bulkDelete'])
+        ->name('admin.customers.bulkDelete');
+    // Bulk delete (separate endpoint)
+    // Route::post('customers/bulk-destroy', [CustomerController::class, 'bulkDelete'])
+    //     ->name('admin.customers.bulkdelete');
+    Route::patch('/{customer}/toggle-status', [CustomerController::class, 'toggleStatus'])
+        ->name('admin.customers.toggle-status');
     Route::resource('reviews', ReviewController::class)->names('admin.reviews');
     Route::resource('wishlists', WishlistController::class)->names('admin.wishlists');
 

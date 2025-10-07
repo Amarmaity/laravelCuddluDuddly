@@ -20,7 +20,7 @@
 
         {{-- Header --}}
         @if (!isset($hideHeaderFooter) || !$hideHeaderFooter)
-            @include('layouts.header')
+            @include('customer/layouts.header')
         @endif
 
         {{-- Page Content --}}
@@ -30,7 +30,7 @@
 
         {{-- Footer --}}
         @if (!isset($hideHeaderFooter) || !$hideHeaderFooter)
-            @include('layouts.footer')
+            @include('customer/layouts.footer')
         @endif
 
     </body>

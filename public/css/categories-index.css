@@ -1,0 +1,237 @@
+/* resources/css/category-index.css */
+.category-tree {
+    padding-left: 0;
+    list-style: none;
+}
+
+.tree-item {
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+}
+
+.tree-item:last-child {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tree-item:first-child {
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.tree-item.no-bottom-border {
+    border-bottom: none;
+}
+
+.tree-item:last-of-type:not(.no-bottom-border) {
+    border-bottom-left-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    gap: 0.75rem;
+}
+
+.item-content:hover {
+    background-color: #f8f9fa;
+}
+
+.item-content.level-1 {
+    padding-left: 2rem;
+}
+
+.tree-toggler {
+    cursor: pointer;
+    width: 1.25rem;
+    text-align: center;
+    color: #6c757d;
+    transition: transform 0.2s ease-in-out;
+}
+
+.tree-toggler[aria-expanded="true"] {
+    transform: rotate(90deg);
+}
+
+.tree-toggler.invisible {
+    visibility: hidden;
+}
+
+.item-name {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.action-icons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-icons a {
+    color: #6c757d;
+    display: none;
+}
+
+.item-content:hover .action-icons a {
+    display: inline-block;
+}
+
+.action-icons a:hover {
+    color: #0d6efd;
+}
+
+.nested {
+    padding-left: 0;
+    list-style: none;
+    display: none;
+}
+
+.nested.active {
+    display: block;
+}
+
+/* Category card styles */
+.category-grid-container {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.category-card {
+    position: relative;
+    text-align: center;
+    transition: box-shadow .2s ease-in-out;
+}
+
+.category-card:hover {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .075);
+}
+
+.category-card .form-check-input {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 10;
+}
+
+.category-card .action-icon {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    display: none;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+}
+
+.category-card:hover .action-icon {
+    display: inline-block;
+}
+
+.category-card .card-body {
+    padding: 0.5rem;
+}
+
+.category-card .card-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+/* ✅ Unified image wrapper for both master & category */
+.image-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    margin: 0.5rem auto 0;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+}
+
+.image-wrapper:hover .image-overlay {
+    opacity: 1;
+}
+
+.image-overlay i {
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.image-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-progress {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 4px 8px;
+    border-radius: 12px;
+    min-width: 36px;
+    text-align: center;
+}
+
+/* keep fade-in animation */
+.fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+/* existing toast container position preserved */
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1055;
+}

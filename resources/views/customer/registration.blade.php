@@ -1,4 +1,4 @@
-@extends('layouts.masterLayout')
+@extends('customer/layouts.masterLayout')
 
 @section('title', 'Register')
 
@@ -7,7 +7,7 @@
 @endphp
 
 @section('content')
-    <div class="max-w-md mx-auto bg-white shadow-md rounded-lg p-6 mt-36">
+    <div class="mx-auto bg-white shadow-md flex flex-col justify-center items-center   rounded-lg p-6 mt-36">
 
         {{-- SweetAlert Messages --}}
         @if(session('success'))
@@ -34,15 +34,24 @@
 
         <h2 class="text-2xl font-bold text-pink-600 mb-4">Create Account</h2>
 
-        <form method="POST" action="{{ route('store-customer') }}">
+        <form method="POST" class="grid w-[800px]  grid-cols-2 gap-2.5" action="{{ route('store-customer') }}">
             @csrf
 
             <!-- Full Name -->
             <div class="mb-4">
-                <label for="name" class="block text-gray-700 font-medium">Full Name</label>
-                <input id="name" type="text" name="name" value="{{ old('name') }}" required
+                <label for="first_name" class="block text-gray-700 font-medium">First Name</label>
+                <input id="first_name" type="text" name="first_name" value="{{ old('first_name') }}" required
                     class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500">
-                @error('name')
+                @error('first_name')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="last_name" class="block text-gray-700 font-medium">Last Name</label>
+                <input id="last_name" type="text" name="last_name" value="{{ old('last_name') }}" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500">
+                @error('last_name')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
@@ -60,15 +69,41 @@
             <!-- Mobile -->
             <div class="mb-4">
                 <label for="mobile" class="block text-gray-700 font-medium">Mobile</label>
-                <input id="mobile" type="text" name="mobile" value="{{ old('mobile') }}" required
+                <input id="mobile" type="text" name="phone" value="{{ old('phone') }}" required
                     class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500">
-                @error('mobile')
+                @error('phone')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
 
+            <div class="mb-4">
+                <label for="dob" class="block text-gray-700 font-medium">Date Of Birth</label>
+                <input id="dob" type="date" name="dob" value="{{ old('dob') }}" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500">
+                @error('dob')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            
+
             <!-- Hidden User Type -->
-            <input type="hidden" name="usertype" value="customer">
+            {{-- <input type="hidden" name="usertype" value="customer"> --}}
+
+            <div class="mb-4">
+                <label for="gender" class="block text-gray-700 font-medium">Gender</label>
+                <select id="gender" name="gender" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-pink-500">
+                    <option value="">-- Select Gender --</option>
+                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
+                </select>
+                @error('gender')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
 
             <!-- Password -->
             <div class="mb-4">
@@ -88,9 +123,9 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-6">
+            <div class="col-span-2 flex justify-center mt-4">
                 <button type="submit"
-                    class="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition">
+                    class="bg-pink-600 w-[250px] hover:bg-pink-700 text-white font-medium py-2 px-4 rounded-lg transition">
                     Register
                 </button>
             </div>

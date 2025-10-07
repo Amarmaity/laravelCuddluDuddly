@@ -26,61 +26,15 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('masterCategories'));
     }
 
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'name'      => 'required|string|max:255',
-    //         'type'      => 'required|in:master,section,category',
-    //         'parent_id' => 'nullable|integer',
-    //     ]);
 
-    //     $slug = Str::slug($validated['name']);
-
-    //     if ($validated['type'] === 'master') {
-    //         MasterCategory::create([
-    //             'name'      => $validated['name'],
-    //             'slug'      => $slug,
-    //             'image_url' => null,
-    //             'status'    => 1,
-    //         ]);
-    //     }
-
-    //     if ($validated['type'] === 'section') {
-    //         $section = SectionType::create([
-    //             'name' => $validated['name'],
-    //             'slug' => $slug,
-    //         ]);
-
-    //         MasterCategorySection::create([
-    //             'master_category_id' => $validated['parent_id'],
-    //             'section_type_id'    => $section->id,
-    //         ]);
-    //     }
-
-    //     if ($validated['type'] === 'category') {
-    //         $category = Category::create([
-    //             'name'        => $validated['name'],
-    //             'slug'        => $slug,
-    //             'description' => null,
-    //             'image_url'   => null,
-    //         ]);
-
-    //         MasterCategorySection::create([
-    //             'section_type_id' => $validated['parent_id'],
-    //             'category_id'     => $category->id,
-    //         ]);
-    //     }
-
-    //     return redirect()->route('admin.categories.index')
-    //         ->with('success', ucfirst($validated['type']) . ' created successfully.');
-    // }
 
     public function store(Request $request)
-    {
+    {                
         $validated = $request->validate([
             'name'      => 'required|string|max:255',
             'type'      => 'required|in:master,section,category',
             'parent_id' => 'nullable|integer',
+            'master_id' => 'nullable|integer',
         ]);
 
         $slug = Str::slug($validated['name']);
@@ -100,10 +54,14 @@ class CategoryController extends Controller
                 'name' => $validated['name'],
                 'slug' => $slug,
             ]);
-            MasterCategorySection::create([
+
+            MasterCategorySection::firstOrCreate([
                 'master_category_id' => $validated['parent_id'],
                 'section_type_id'    => $section->id,
+            ], [
+                'category_id' => null,
             ]);
+
             $created = $section;
         }
 
@@ -114,10 +72,36 @@ class CategoryController extends Controller
                 'description' => null,
                 'image_url'   => null,
             ]);
-            MasterCategorySection::create([
-                'section_type_id' => $validated['parent_id'],
-                'category_id'     => $category->id,
-            ]);
+
+            $sectionTypeId = $validated['parent_id'];
+            $masterId = $request->input('master_id');
+            $pivotQuery = MasterCategorySection::where('section_type_id', $sectionTypeId)
+                ->whereNull('category_id');
+
+            if ($masterId) {
+                $pivotQuery = $pivotQuery->where(function ($q) use ($masterId) {
+                    $q->where('master_category_id', $masterId)
+                        ->orWhereNull('master_category_id');
+                });
+            }
+
+            $pivot = $pivotQuery->orderByRaw('master_category_id IS NULL, master_category_id') // prefer non-null master first
+                ->first();
+
+            if ($pivot) {
+                $pivot->category_id = $category->id;
+                if (is_null($pivot->master_category_id) && $masterId) {
+                    $pivot->master_category_id = $masterId;
+                }
+                $pivot->save();
+            } else {
+                MasterCategorySection::create([
+                    'master_category_id' => $masterId ?? null,
+                    'section_type_id'    => $sectionTypeId,
+                    'category_id'        => $category->id,
+                ]);
+            }
+
             $created = $category;
         }
 
@@ -134,39 +118,6 @@ class CategoryController extends Controller
             ->with('success', ucfirst($validated['type']) . ' created successfully.');
     }
 
-    // public function update(Request $request, $id)
-    // {
-    //     $validated = $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'type' => 'required|in:master,section,category',
-    //     ]);
-
-    //     $slug = Str::slug($validated['name']);
-
-    //     if ($validated['type'] === 'master') {
-    //         MasterCategory::where('id', $id)->update([
-    //             'name' => $validated['name'],
-    //             'slug' => $slug,
-    //         ]);
-    //     }
-
-    //     if ($validated['type'] === 'section') {
-    //         SectionType::where('id', $id)->update([
-    //             'name' => $validated['name'],
-    //             'slug' => $slug,
-    //         ]);
-    //     }
-
-    //     if ($validated['type'] === 'category') {
-    //         Category::where('id', $id)->update([
-    //             'name' => $validated['name'],
-    //             'slug' => $slug,
-    //         ]);
-    //     }
-
-    //     return redirect()->route('admin.categories.index')
-    //         ->with('success', ucfirst($validated['type']) . ' updated successfully.');
-    // }
 
     public function update(Request $request, $id)
     {

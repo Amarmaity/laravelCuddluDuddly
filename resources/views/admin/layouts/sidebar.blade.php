@@ -22,7 +22,11 @@
 @endphp
 
 <div class="sidebar">
-    <h4 class="p-3 border-bottom">LazyShop</h4>
+    <div class="sidebar-header d-flex align-items-center p-3 border-bottom">
+        <img src="{{ asset('logo/cuddlyduddly_logo.png') }}" alt="CuddlyDuddly Logo" class="me-2"
+            style="height: 32px; width:auto;">
+        <h4 class="m-0">CuddlyDuddly</h4>
+    </div>
 
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
         <i class="bi bi-speedometer2"></i> Dashboard
@@ -37,11 +41,11 @@
         <a href="{{ route('admin.sellers.index') }}"
             class="{{ request()->routeIs('admin.sellers.index') ? 'active' : '' }}">All Sellers</a>
         <a href="{{ route('admin.seller-applications.index') }}"
-            class="{{ request()->routeIs('admin.seller-applications.*') ? 'active' : '' }}">Seller Applications</a>
-        <a href="{{ route('admin.payouts.index') }}"
-            class="{{ request()->routeIs('admin.payouts.*') ? 'active' : '' }}">Payouts</a>
+            class="{{ request()->routeIs('admin.seller-applications.index') ? 'active' : '' }}">Seller Applications</a>
         <a href="{{ route('admin.sellers.compliance') }}"
             class="{{ request()->routeIs('admin.sellers.compliance') ? 'active' : '' }}">KYC / Compliance</a>
+        <a href="{{ route('admin.payouts.index') }}"
+            class="{{ request()->routeIs('admin.payouts.*') ? 'active' : '' }}">Payouts</a>
     </div>
 
     {{-- Products --}}

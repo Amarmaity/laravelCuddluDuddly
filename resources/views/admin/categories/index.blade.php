@@ -3,7 +3,7 @@
 @section('title', 'Manage Categories')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('public/css/categories-index.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/categories-index.css') }}">
 @endpush
 
 @section('content')
@@ -83,6 +83,7 @@
                                                         data-bs-toggle="modal" data-bs-target="#actionModal"
                                                         data-action="add" data-type="category"
                                                         data-parent-id="{{ $sectionType->id }}"
+                                                        data-master-id="{{ $masterCategory->id }}"
                                                         data-parent-name="{{ $sectionType->name }}">
                                                         <i class="bi bi-plus-circle-fill"></i>
                                                     </a>
@@ -165,6 +166,7 @@
                     <div id="method-field"></div>
                     <input type="hidden" name="type" id="actionType">
                     <input type="hidden" name="parent_id" id="actionParentId">
+                    <input type="hidden" name="master_id" id="actionMasterId">
                     <div class="modal-header">
                         <h5 class="modal-title fs-6" id="actionModalLabel"></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -200,169 +202,5 @@
             uploadImage: "{{ route('admin.categories.uploadImage') }}"
         };
     </script>
-    <script src="{{ asset('public/js/categories-index.js') }}" defer></script>
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- Tree Toggler Logic (FIXED) ---
-            document.querySelectorAll('.tree-toggler').forEach(toggler => {
-                toggler.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    // Use a more robust selector to find the common parent `<li>`
-                    const parentItem = this.closest('.tree-item');
-                    const nestedList = parentItem.querySelector('.nested');
-
-                    if (nestedList) {
-                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                        this.setAttribute('aria-expanded', !isExpanded);
-                        this.classList.toggle('bi-chevron-right', isExpanded);
-                        this.classList.toggle('bi-chevron-down', !isExpanded);
-                        nestedList.classList.toggle('active');
-                    }
-                });
-            });
-
-            // --- Unified Modal Logic (No changes needed) ---
-            const actionModalEl = document.getElementById('actionModal');
-            const actionModal = new bootstrap.Modal(actionModalEl);
-            const modalForm = document.getElementById('actionForm');
-            const modalTitle = document.getElementById('actionModalLabel');
-            const nameInput = document.getElementById('actionName');
-            const typeInput = document.getElementById('actionType');
-            const parentIdInput = document.getElementById('actionParentId');
-            const submitButton = document.getElementById('actionSubmitButton');
-            const methodFieldContainer = document.getElementById('method-field');
-
-            document.querySelectorAll('.action-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const action = this.dataset.action;
-                    const type = this.dataset.type;
-                    const typeTitleCase = type.charAt(0).toUpperCase() + type.slice(1);
-
-                    modalForm.reset();
-                    methodFieldContainer.innerHTML = '';
-                    parentIdInput.value = '';
-                    submitButton.textContent = 'Save';
-                    submitButton.classList.remove('btn-success');
-                    submitButton.classList.add('btn-primary');
-
-                    typeInput.value = type;
-
-                    if (action === 'add') {
-                        modalForm.action = "{{ route('admin.categories.store') }}";
-                        modalTitle.textContent = `Add New ${typeTitleCase}`;
-                        if (type !== 'master') {
-                            modalTitle.textContent += ` to "${this.dataset.parentName}"`;
-                        }
-                        parentIdInput.value = this.dataset.parentId || '';
-                        submitButton.textContent = 'Create';
-                        submitButton.classList.replace('btn-primary', 'btn-success');
-                    } else if (action === 'edit') {
-                        const id = this.dataset.id;
-                        modalForm.action = `/admin/categories/${id}`;
-                        methodFieldContainer.innerHTML = `@method('PUT')`;
-                        modalTitle.textContent = `Edit ${typeTitleCase}`;
-                        nameInput.value = this.dataset.name;
-                        submitButton.textContent = 'Save Changes';
-                    }
-                });
-            });
-
-            actionModalEl.addEventListener('shown.bs.modal', () => {
-                nameInput.focus();
-            });
-
-            // --- Checkbox Propagation Logic (No changes needed) ---
-            document.querySelectorAll('.parent-checkbox').forEach(parentCheckbox => {
-                parentCheckbox.addEventListener('change', function() {
-                    const parentItem = this.closest('.tree-item');
-                    const nestedContainer = parentItem.querySelector('.nested');
-                    if (nestedContainer) {
-                        nestedContainer.querySelectorAll('.child-checkbox').forEach(
-                            childCheckbox => {
-                                childCheckbox.checked = this.checked;
-                            });
-                    }
-                });
-            });
-
-        });
-        // --- Bulk Delete Confirmation ---
-        function confirmBulkDelete() {
-            const selectedCount = document.querySelectorAll('#bulkForm input[type="checkbox"]:checked').length;
-            if (selectedCount === 0) {
-                alert("Please select at least one item to delete.");
-                return false;
-            }
-            return confirm(
-                `Are you sure you want to delete the ${selectedCount} selected item(s)? This action cannot be undone.`);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.image-input').forEach(input => {
-                input.addEventListener('change', function() {
-                    const file = this.files[0];
-                    if (!file) return;
-
-                    const id = this.dataset.id;
-                    const type = this.dataset.type;
-                    const progressEl = document.getElementById(`progress-${id}`);
-                    const previewEl = document.querySelector(`.preview-${id}`);
-
-                    let formData = new FormData();
-                    formData.append('image', file);
-                    formData.append('id', id);
-                    formData.append('type', type);
-                    formData.append('_token', '{{ csrf_token() }}');
-
-                    let xhr = new XMLHttpRequest();
-                    xhr.open('POST', '{{ route('admin.categories.uploadImage') }}', true);
-
-                    // ✅ Show progress %
-                    xhr.upload.addEventListener('progress', (e) => {
-                        if (e.lengthComputable) {
-                            let percent = Math.round((e.loaded / e.total) * 100);
-                            progressEl.style.display = 'block';
-                            progressEl.textContent = percent + '%';
-                        }
-                    });
-
-                    xhr.onload = function() {
-                        progressEl.style.display = 'none';
-                        progressEl.textContent = '0%';
-
-                        if (xhr.status === 200) {
-                            let response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                // ✅ Force fresh image (avoid caching)
-                                previewEl.src = response.url + '?v=' + new Date().getTime();
-
-                                if (typeof showToast === 'function') {
-                                    showToast(response.message || "Image uploaded", 'success');
-                                }
-                            } else {
-                                if (typeof showToast === 'function') {
-                                    showToast(response.message || "Upload failed", 'danger');
-                                }
-                            }
-                        } else {
-                            if (typeof showToast === 'function') {
-                                showToast("Upload error", 'danger');
-                            }
-                        }
-                    };
-
-                    xhr.onerror = function() {
-                        progressEl.style.display = 'none';
-                        progressEl.textContent = '0%';
-                        if (typeof showToast === 'function') {
-                            showToast("Network error", 'danger');
-                        }
-                    };
-
-                    xhr.send(formData);
-                });
-            });
-        });
-    </script> --}}
+    <script src="{{ asset('js/categories-index.js') }}" defer></script>
 @endpush
