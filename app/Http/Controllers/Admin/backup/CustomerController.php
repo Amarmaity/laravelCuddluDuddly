@@ -3,197 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
-
+use App\Models\User;
 
 class CustomerController extends Controller
 {
-
-    // public function home($id)
-    // {
-    //     $user = Auth::user();
-    //     // $user = User::findOrFail($id); // Load user by ID
-    //     return view('home', compact('user'));
-    // }
-
-
-    // public function index()
-    // {
-    //     return view('admin/customer_management/custmerManagement');
-    // }
-
-    // public function registerView()
-    // {
-    //     return view('customer.registration');
-    // }
-
-
-    // private function registration(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'first_name' => 'required|string|max:255',
-    //         'last_name'  => 'required|string|max:255',
-    //         'email'      => 'required|string|email|max:255|unique:users',
-    //         'dob'        => 'required|date',
-    //         'gender'     => 'required|in:male,female,other',
-    //         'phone'     => 'required|string|max:15|unique:users',
-    //         'password'   => 'required|string|min:6|confirmed',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return ['errors' => $validator->errors()];
-    //     }
-
-    //     $user = User::create([
-    //         'first_name' => $request->first_name,
-    //         'last_name' => $request->last_name,
-    //         'email'    => $request->email,
-    //         'phone'   => $request->phone,
-    //         'dob'      => $request->dob,
-    //         'gender'   => $request->gender,
-    //         'password' => Hash::make($request->password),
-    //     ]);
-
-    //     return ['user' => $user];
-    // }
-
-
-    // // 🔹 For Blade/Web
-    // public function store(Request $request)
-    // {
-    //     $result = $this->registration($request);
-
-    //     if (isset($result['errors'])) {
-    //         return back()->withErrors($result['errors'])->withInput();
-    //     }
-
-    //     return redirect('customer-login')->with('success', 'Registration successful! Welcome ' . $result['user']->name);
-    // }
-
-    // // 🔹 For API
-    // public function apiRegister(Request $request)
-    // {
-    //     $result = $this->registration($request);
-
-    //     if (isset($result['errors'])) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'errors' => $result['errors']
-    //         ], 422);
-    //     }
-
-    //     return response()->json([
-    //         'status'  => 'success',
-    //         'message' => 'Registration successful',
-    //         'user'    => $result['user']
-    //     ], 201);
-    // }
-
-
-    // public function customerLogin()
-    // {
-    //     return view('customer.login');
-    // }
-
-
-    // private function authenticate(Request $request)
-    // {
-    //     // Validate input
-    //     $validator = Validator::make($request->all(), [
-    //         'login'    => 'required|string', // email or mobile
-    //         'password' => 'required|string|min:6',
-    //     ]);
-
-    //     if ($validator->fails()) {
-    //         return ['errors' => $validator->errors()];
-    //     }
-
-    //     // Determine login type
-    //     $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'mobile';
-
-    //     // Find user
-    //     $user = User::where($loginType, $request->login)
-    //         ->where('usertype', 'customer') // only customers
-    //         ->first();
-
-    //     if (!$user || !Hash::check($request->password, $user->password)) {
-    //         return ['errors' => ['login' => ['Invalid credentials or not a customer']]];
-    //     }
-
-    //     return ['user' => $user];
-    // }
-
-    // // 🔹 For Blade / Web login
-    // public function loginWeb(Request $request)
-    // {
-    //     $result = $this->authenticate($request);
-
-    //     if (isset($result['errors'])) {
-    //         return back()->withErrors($result['errors'])->withInput();
-    //     }
-
-    //     $user = $result['user'];
-    //     Auth::login($user);
-
-    //     return redirect()->route('home', ['id' => $user->id]);
-    // }
-
-
-    // // 🔹 For API login
-    // public function loginApi(Request $request)
-    // {
-    //     $result = $this->authenticate($request);
-
-    //     if (isset($result['errors'])) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'errors' => $result['errors']
-    //         ], 422);
-    //     }
-
-    //     $user = $result['user'];
-
-    //     // Optional: create API token if using Sanctum or Passport
-    //     $token = $user->createToken('API Token')->plainTextToken;
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Login successful',
-    //         'user' => [
-    //             'id'       => $user->id,
-    //             'name'     => $user->name,
-    //             'email'    => $user->email,
-    //             'mobile'   => $user->mobile,
-    //             'usertype' => $user->usertype,
-    //         ],
-    //         'token' => $token
-    //     ], 200);
-    // }
-
-    // public function logoutWeb(Request $request)
-    // {
-    //     Auth::logout();
-    //     $request->session()->invalidate();
-    //     $request->session()->regenerateToken();
-
-    //     return redirect('/')->with('success', 'You have been logged out successfully.');
-    // }
-
-    // public function logoutApi(Request $request)
-    // {
-    //     $user = $request->user();
-    //     $user->tokens()->delete();
-
-    //     return response()->json([
-    //         'status' => 'success',
-    //         'message' => 'Logged out successfully'
-    //     ], 200);
-    // }
-
-    // public function 
-
-
 
     public function index(Request $request)
     {
@@ -235,14 +49,11 @@ class CustomerController extends Controller
 
         return view('admin.customers.index', compact('customers'));
     }
-
-
     // Show create form
     public function create()
     {
         return view('admin.customers.create');
     }
-
 
     public function store(Request $request)
     {
@@ -282,7 +93,6 @@ class CustomerController extends Controller
         return view('admin.customers.show', compact('customer'));
     }
 
-
     // Edit form
     public function edit(User $customer)
     {
@@ -290,24 +100,19 @@ class CustomerController extends Controller
     }
 
     // Update
-        public function update(Request $request, User $customer)
+    public function update(Request $request, User $customer)
     {
         $request->validate([
-            'first_name'  => 'required|string|max:255',
-            'last_name'   => 'required|string|max:255',
-            'gender'      => 'required|in:male,female,other',
-            'email'       => 'required|email|unique:users,email,' . $customer->id,
-            'phone'       => 'nullable|string|max:20',
-            'dob'         => 'required|date',
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:customers,email,' . $customer->id,
+            'phone' => 'nullable|string|max:20',
         ]);
 
-        $customer->update($request->only(['first_name', 'last_name', 'email', 'phone', 'gender', 'dob']));
+        $customer->update($request->only(['name', 'email', 'phone']));
 
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer updated successfully.');
     }
-
-
 
     // public function destroy(Request $request, $id = null)
     // {
@@ -348,11 +153,14 @@ class CustomerController extends Controller
 
     public function bulkDelete(Request $request)
     {
-        echo 'hi';
-        exit;
-        $ids = $request->ids ?? [];
+        $ids = $request->ids;
 
-        if (!empty($ids)) {
+        // decode if it comes as JSON string
+        if (is_string($ids)) {
+            $ids = json_decode($ids, true);
+        }
+
+        if (!empty($ids) && is_array($ids)) {
             User::whereIn('id', $ids)->delete();
         }
 

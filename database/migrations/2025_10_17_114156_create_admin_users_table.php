@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
+        Schema::create('admin_users', function (Blueprint $table) {
+            $table->bigIncrements('id');
             $table->string('name');
-            $table->string('image')->nullable(); // store image path
-            $table->text('description')->nullable();
-            $table->decimal('price', 10, 2)->default(0.00);
-            $table->integer('stock')->default(0);
-            $table->boolean('status')->default(true);
+            $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            $table->string('password');
+            $table->string('role')->default('admin');
+            $table->boolean('is_active')->default(true)->comment('1=active,0=inactive');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('admin_users');
     }
 };

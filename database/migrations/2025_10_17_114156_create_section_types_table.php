@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-             $table->string('mobile')->unique()->after('email');
-            $table->string('usertype')->after('mobile');
+        Schema::create('section_types', function (Blueprint $table) {
+            $table->integer('id', true);
+            $table->string('name')->nullable();
+            $table->string('slug')->nullable();
         });
     }
 
@@ -22,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['mobile', 'usertype']);
-        });
+        Schema::dropIfExists('section_types');
     }
 };

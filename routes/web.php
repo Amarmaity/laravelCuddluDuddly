@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\SellerController;
 use App\Http\Controllers\Admin\PayoutController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\SettingsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,7 +31,7 @@ Route::prefix('admin')->group(function () {
     Route::get('seller-compliance', [SellerController::class, 'compliance'])->name('admin.sellers.compliance');
     Route::patch('seller-compliance/{seller}/accept', [SellerController::class, 'KYCaccept'])->name('admin.sellers.compliance.accept');
     Route::patch('seller-compliance/{seller}/reject', [SellerController::class, 'KYCreject'])->name('admin.sellers.compliance.reject');
-    
+
     Route::get('sellers/bank-details/{seller}', [SellerController::class, 'bankDetails'])->name('admin.sellers.bankDetails');
     Route::resource('payouts', PayoutController::class)->names('admin.payouts');
     Route::post('webhooks/razorpayx', [\App\Http\Controllers\Admin\WebhookController::class, 'razorpayx'])->name('admin.webhooks.razorpayx');
@@ -40,11 +42,24 @@ Route::prefix('admin')->group(function () {
     Route::post('categories/bulk-action', [CategoryController::class, 'bulkAction'])
         ->name('admin.categories.bulkAction');
     Route::post('/admin/categories/upload-image', [CategoryController::class, 'uploadImage'])->name('admin.categories.uploadImage');
+    Route::post('products/bulk-feature', [ProductController::class, 'bulkFeature']);
+    Route::post('products/bulk-approve', [ProductController::class, 'bulkApprove']);
+    Route::get('products/{id}/quick-view', [ProductController::class, 'quickView'])
+        ->name('admin.products.quickView');
+
     Route::resource('brands', BrandController::class)->names('admin.brands');
     Route::get('inventory', [InventoryController::class, 'index'])->name('admin.inventory.index');
 
     // Orders
     Route::resource('orders', OrderController::class)->names('admin.orders');
+    Route::get('orders/{id}/quick-view', [OrderController::class, 'quickView'])->name('admin.orders.quickView');
+    Route::get('orders/get-addresses/{user}', [OrderController::class, 'getAddresses'])->name('admin.orders.get-addresses');
+    Route::get('shipping-addresses/{id}', [OrderController::class, 'ShippingAddressshow']);
+    Route::post('shipping-addresses/{id}', [OrderController::class, 'ShippingAddressupdate']);
+    Route::delete('shipping-addresses/{id}', [OrderController::class, 'ShippingAddressdestroy']);
+
+
+
     Route::resource('returns', ReturnController::class)->names('admin.returns');
     Route::resource('cancellations', CancellationController::class)->names('admin.cancellations');
 
@@ -68,7 +83,10 @@ Route::prefix('admin')->group(function () {
     Route::get('reports/customer-insights', [ReportController::class, 'customerInsights'])->name('admin.reports.customer-insights');
 
     // Settings
-    Route::get('settings/general', [SettingController::class, 'general'])->name('admin.settings.general');
+    
+    Route::get('settings/general', [SettingsController::class, 'indexGeneral'])->name('admin.settings.general');
+    Route::post('settings/update', [SettingsController::class, 'updateGeneral'])->name('admin.settings.general.update');
+
     Route::get('settings/payments', [SettingController::class, 'payments'])->name('admin.settings.payments');
     Route::get('settings/shipping', [SettingController::class, 'shipping'])->name('admin.settings.shipping');
     Route::resource('roles', RoleController::class)->names('admin.roles');

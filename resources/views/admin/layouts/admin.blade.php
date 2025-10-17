@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+    <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -129,7 +131,7 @@
 
             <!-- Success Alert -->
             @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                <div id="flash-success" class="alert alert-success alert-dismissible fade show shadow-sm">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -137,13 +139,11 @@
 
             <!-- Error Alert -->
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                <div id="flash-error" class="alert alert-danger alert-dismissible fade show shadow-sm">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
-
-
             @yield('content')
 
         </main>
@@ -166,3 +166,24 @@
 </body>
 
 </html>
+<script>
+    // Auto-hide success message
+    setTimeout(() => {
+        const flashSuccess = document.getElementById('flash-success');
+        if (flashSuccess) {
+            flashSuccess.classList.remove('show');
+            flashSuccess.classList.add('fade');
+            flashSuccess.style.display = 'none';
+        }
+    }, 3000); // 3 seconds
+
+    // Auto-hide error message
+    setTimeout(() => {
+        const flashError = document.getElementById('flash-error');
+        if (flashError) {
+            flashError.classList.remove('show');
+            flashError.classList.add('fade');
+            flashError.style.display = 'none';
+        }
+    }, 3000); // 3 seconds
+</script>

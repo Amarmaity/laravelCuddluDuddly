@@ -4,15 +4,6 @@
 
 @section('content')
     <div class="container-fluid">
-
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0"><i class="bi bi-people me-2"></i> Customers</h2>
-            <a href="{{ route('admin.customers.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> Add Customer
-            </a>
-        </div>
-
         <!-- Filters & Search -->
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-body">
