@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,7 +11,8 @@ use App\Models\Products;
 use App\Models\User;
 use App\Models\ShippingAddress;
 use App\Models\OrderItem;
-use Nette\Utils\Validators;
+use App\Models\Cancellation;
+use DateTime;
 
 class OrderController extends Controller
 {
@@ -65,11 +67,13 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders', 'customers'));
     }
 
-    // public function show($id)
-    // {
-    //     $order = Order::with(['user', 'items.product', 'shippingAddress'])->findOrFail($id);
-    //     return view('admin.orders.show', compact('order'));
-    // }
+    public function show($id)
+    {
+        $order = Order::with(['user', 'shippingAddress', 'items.product'])
+            ->findOrFail($id);
+
+        return view('admin.orders.show', compact('order'));
+    }
 
     public function quickView($id)
     {
@@ -90,7 +94,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
 
     public function create()
     {
@@ -189,6 +192,23 @@ class OrderController extends Controller
         return response()->json(['success' => true]);
     }
 
+    private function generateOrderNumber($userId)
+    {
+        $datePart = now()->format('ymd'); // e.g. 251016
+        $userHash = strtoupper(substr(base_convert($userId * 12345, 10, 36), 0, 3)); // encodes user ID
+        $sequence = str_pad(Order::count() + 1, 4, '0', STR_PAD_LEFT); // running count
+        $timeHash = strtoupper(substr(md5(microtime(true)), 0, 3)); // short hash for randomness
+
+        // Combine all parts
+        $rawCode = "OD{$datePart}{$userHash}X{$sequence}{$timeHash}";
+
+        // Optional checksum (simple numeric sum of digits mod 9)
+        $digitsOnly = preg_replace('/\D/', '', $rawCode);
+        $checksum = substr(array_sum(str_split($digitsOnly)) % 9, 0, 1);
+
+        return "{$rawCode}X{$checksum}";
+    }
+
     public function store(Request $request)
     {
         // Base validation
@@ -210,7 +230,7 @@ class OrderController extends Controller
             // New address required
             $baseRules = array_merge($baseRules, [
                 'shipping_name'    => 'required|string|max:255',
-                'shipping_phone'   => 'required|string|max:20',
+                'shipping_phone'   => ['required', 'regex:/^[6-9]\d{9}$/',],
                 'shipping_email'   => 'nullable|email|max:255',
                 'landmark'         => 'nullable|string|max:255',
                 'address_line1'    => 'required|string|max:255',
@@ -257,12 +277,12 @@ class OrderController extends Controller
 
                 $shippingAddressId = $shipping->id;
             }
-
+            $orderNumber = $this->generateOrderNumber($request->user_id);
             // Create order
             $order = Order::create([
                 'user_id'             => $request->user_id,
                 'shipping_address_id' => $shippingAddressId,
-                'order_number'        => 'ORD-' . strtoupper(uniqid()),
+                'order_number'        => $orderNumber,
                 'status'              => $request->order_status,
                 'payment_method'      => $request->payment_method,
                 'payment_status'      => $request->payment_status,
@@ -355,7 +375,6 @@ class OrderController extends Controller
         ));
     }
 
-
     public function update(Request $request, $id)
     {
         // 🔹 Base validation
@@ -376,7 +395,7 @@ class OrderController extends Controller
         } else {
             $baseRules = array_merge($baseRules, [
                 'shipping_name'    => 'required|string|max:255',
-                'shipping_phone'   => 'required|string|max:20',
+                'shipping_phone'   => ['required', 'regex:/^[6-9]\d{9}$/',],
                 'shipping_email'   => 'nullable|email|max:255',
                 'landmark'         => 'nullable|string|max:255',
                 'address_line1'    => 'required|string|max:255',
@@ -384,7 +403,7 @@ class OrderController extends Controller
                 'city'             => 'required|string|max:100',
                 'state'            => 'required|string|max:100',
                 'postal_code'      => 'required|string|max:20',
-                'country'          => 'nullable|string|max:100',
+                'country'          => 'nullable|string|max:100'
             ]);
         }
 
@@ -489,4 +508,29 @@ class OrderController extends Controller
                 ->withErrors(['error' => 'Failed to update order: ' . $e->getMessage()]);
         }
     }
+
+    // public function cancel(Request $request, $id)
+    // {
+    //     $order = Order::findOrFail($id);
+
+    //     if ($order->order_status === 'cancelled') {
+    //         return response()->json(['message' => 'Order is already cancelled.'], 400);
+    //     }
+
+    //     $reason = $request->input('reason', 'No reason provided.');
+
+    //     Cancellation::create([
+    //         'order_id'    => $order->id,
+    //         'user_id'     => $order->user_id,
+    //         'reason'      => $reason,
+    //         'status'      => 'approved',
+    //         'approved_by' => Auth::id(),
+    //     ]);
+
+    //     $order->update([
+    //         'order_status' => 'cancelled',
+    //     ]);
+
+    //     return response()->json(['message' => 'Order cancelled successfully.']);
+    // }
 }

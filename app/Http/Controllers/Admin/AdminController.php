@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\AdminUser;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -15,49 +16,91 @@ class AdminController extends Controller
         return view('admin.login');
     }
 
+    // public function login(Request $request)
+    // {
+    //     $request->validate([
+    //         'email_or_phone' => 'required|string',
+    //         'password' => 'required|string',
+    //         'user_type' => 'required|string',
+    //     ]);
+
+    //     $emailOrPhone = $request->input('email_or_phone');
+    //     $password = $request->input('password');
+
+    //     // Try email first
+    //     $credentials = ['email' => $emailOrPhone, 'password' => $password];
+    //     if (Auth::guard('admin')->attempt($credentials)) {
+    //         $request->session()->regenerate();
+    //         return redirect()->route('admin.dashboard');
+    //     }
+
+    //     // Try phone if not email
+    //     $credentials = ['phone' => $emailOrPhone, 'password' => $password];
+    //     if (Auth::guard('admin')->attempt($credentials)) {
+    //         $request->session()->regenerate();
+    //         return redirect()->route('admin.dashboard');
+    //     }
+
+    //     return back()->withErrors([
+    //         'login_error' => 'Invalid email, phone, or password.',
+    //     ])->withInput();
+    // }
+
+
     public function login(Request $request)
-    {  
+    {
         $request->validate([
-            'email_or_phone' => 'required',
-            'password' => 'required',
-            'user_type' => 'required',
+            'email_or_phone' => 'required|string',
+            'password' => 'required|string',
+            'user_type' => 'required|string',
         ]);
 
-        $admin = AdminUser::where('email', $request->email_or_phone)
-            ->orWhere('phone', $request->email_or_phone)
+        $emailOrPhone = $request->email_or_phone;
+        $password = $request->password;
+        $role = $request->user_type;
+
+        $admin = AdminUser::where('email', $emailOrPhone)
+            ->orWhere('phone', $emailOrPhone)
             ->first();
 
         if (!$admin) {
-            return back()->withErrors(['email_or_phone' => 'No account found with this email or phone.'])
+            return back()
+                ->withErrors(['email_or_phone' => 'No account found with this email or phone.'])
                 ->withInput();
         }
 
-        if (!Hash::check($request->password, $admin->password)) {
-            return back()->withErrors(['password' => 'Incorrect password.'])
+        if (!Hash::check($password, $admin->password)) {
+            return back()
+                ->withErrors(['password' => 'Incorrect password.'])
                 ->withInput();
         }
 
-        if ($admin->role !== $request->user_type) {
-            return back()->withErrors(['user_type' => 'User type does not match.'])
+        if ($admin->role !== $role) {
+            return back()
+                ->withErrors(['user_type' => 'User type does not match your account.'])
                 ->withInput();
         }
 
-        if (!$admin->is_active == 1) {
-            return back()->withErrors(['status' => 'Your account is inactive. Please contact admin.'])
+        if (!$admin->is_active) {
+            return back()
+                ->withErrors(['status' => 'Your account is inactive. Please contact the administrator.'])
                 ->withInput();
         }
 
-        session(['admin_user' => $admin]);
+        Auth::guard('admin')->login($admin);
+        $request->session()->regenerate();
 
         return redirect()->route('admin.dashboard')
             ->with('success', 'Welcome back, ' . $admin->name . '!');
     }
 
 
-
-    public function logout()
+    public function logout(Request $request)
     {
-        session()->forget('admin_user');
-        return redirect()->route('admin.login')->with('success', 'Logged out successfully');
+        Auth::guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('admin.login');
     }
 }

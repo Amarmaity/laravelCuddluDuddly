@@ -41,12 +41,18 @@ class Products extends Model
     {
         return $this->belongsTo(Sellers::class);
     }
+    
 
     // Product can have many images
     public function images()
     {
         return $this->hasMany(ProductImage::class, 'product_id');
     }
+
+    public function primaryImage()
+{
+    return $this->hasOne(ProductImage::class, 'product_id')->where('is_primary', 1);
+}
 
     // Product can have many reviews
     public function reviews()

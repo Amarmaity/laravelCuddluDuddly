@@ -23,44 +23,56 @@ class PayoutService
 
     public function initiateRazorpayxPayout($payout)
     {
-        // 1) Create Contact (optionally skip if you already maintain contacts)
+        $beneficiary = $payout->beneficiary_snapshot;
+        $method = strtoupper($payout->method);
+
+        // 1) Create Contact
         $contactResp = $this->client->post('v1/contacts', [
             'json' => [
-                'name' => $payout->beneficiary_snapshot['name'],
-                'email' => '', // optional,
-                'contact' => '', // optional
+                'name' => $beneficiary['name'],
                 'type' => 'vendor'
             ],
             'headers' => [
-                'Idempotency-Key' => $payout->idempotency_key // mandatory for payouts per docs
+                'Idempotency-Key' => $payout->idempotency_key
             ]
         ]);
-
         $contact = json_decode($contactResp->getBody()->getContents(), true);
 
-        // 2) Create Fund Account (bank_account or vpa)
-        $fundResp = $this->client->post('v1/fund_accounts', [
-            'json' => [
+        // 2) Create Fund Account (bank or UPI)
+        if ($method === 'UPI') {
+            $fundPayload = [
+                'contact_id' => $contact['id'],
+                'account_type' => 'vpa',
+                'vpa' => [
+                    'address' => $beneficiary['upi']
+                ]
+            ];
+        } else {
+            $fundPayload = [
                 'contact_id' => $contact['id'],
                 'account_type' => 'bank_account',
                 'bank_account' => [
-                    'name' => $payout->beneficiary_snapshot['name'],
-                    'ifsc' => $payout->beneficiary_snapshot['ifsc'],
-                    'account_number' => $payout->beneficiary_snapshot['account']
+                    'name' => $beneficiary['name'],
+                    'ifsc' => $beneficiary['ifsc'],
+                    'account_number' => $beneficiary['account']
                 ]
-            ],
+            ];
+        }
+
+        $fundResp = $this->client->post('v1/fund_accounts', [
+            'json' => $fundPayload,
             'headers' => ['Idempotency-Key' => $payout->idempotency_key]
         ]);
         $fund = json_decode($fundResp->getBody()->getContents(), true);
 
-        // 3) Create payout
+        // 3) Create Payout
         $createResp = $this->client->post('v1/payouts', [
             'json' => [
-                'account_number' => $payout->beneficiary_snapshot['account'], // provider-specific
+                'account_number' => config('services.razorpay.account_number'),
                 'fund_account_id' => $fund['id'],
-                'amount' => intval($payout->amount * 100), // paise if required
-                'currency' => $payout->currency,
-                'mode' => 'IMPS', // or NEFT/RTGS/UPI depending on beneficiary
+                'amount' => intval($payout->amount * 100),
+                'currency' => $payout->currency ?? 'INR',
+                'mode' => $method,
                 'purpose' => 'payout',
                 'narration' => 'Seller payout #' . $payout->id,
             ],

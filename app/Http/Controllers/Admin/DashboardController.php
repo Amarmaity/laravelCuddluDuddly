@@ -9,9 +9,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        if (!session()->has('admin_user')) {
-            return redirect()->route('admin.login')->withErrors(['login_error' => 'Please login first']);
-        }
         return view('admin.dashboard');
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 
 class SettingsController extends Controller
 {
-    public function indexGeneral()
+    public function general()
     {
         $setting = GeneralSetting::first();
 
@@ -119,7 +119,7 @@ class SettingsController extends Controller
 
 
 
-    public function updateGeneral(Request $request)
+    public function update(Request $request)
 {
     $setting = GeneralSetting::first() ?? new GeneralSetting();
 

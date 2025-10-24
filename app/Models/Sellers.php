@@ -9,7 +9,6 @@ class Sellers extends Model
     protected $table = 'sellers';
 
     protected $fillable = [
-        'user_id',
         'name',
         'contact_person',
         'email',

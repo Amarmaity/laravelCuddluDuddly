@@ -1,0 +1,538 @@
+@extends('admin.layouts.admin')
+
+@section('title', 'Create Order')
+@push('style')
+    <style>
+        .address-card {
+            transition: all 0.25s ease-in-out;
+            cursor: pointer;
+        }
+
+        .address-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .btn-link i {
+            transition: color 0.15s ease-in-out;
+        }
+
+        .btn-link:hover i {
+            color: #0d6efd !important;
+        }
+    </style>
+@endpush
+@section('content')
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4><i class="bi bi-bag-plus me-2"></i> Create New Order</h4>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Orders
+        </a>
+    </div>
+
+    {{-- <form id="orderCreateForm" action="{{ route('admin.orders.store') }}" method="POST" class="card shadow-sm border-0">
+        @csrf
+        <div class="card-body">
+            <div class="row g-4">
+
+                <!-- Customer Selection -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Select Customer <span class="text-danger">*</span></label>
+                    <select name="user_id" class="form-select" required>
+                        <option value="">-- Choose Customer --</option>
+                        @foreach ($customers as $customer)
+                            <option value="{{ $customer->id }}">
+                                {{ $customer->full_name }} ({{ $customer->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                    <select name="payment_method" class="form-select" required>
+                        <option value="cod">Cash on Delivery</option>
+                        <option value="online">Online Payment</option>
+                    </select>
+                </div>
+
+                <!-- Payment Status -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Payment Status <span class="text-danger">*</span></label>
+                    <select name="payment_status" class="form-select" required>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <h6 class="fw-bold border-bottom pb-2 mt-3 text-primary">
+                        <i class="bi bi-geo-alt-fill me-2"></i> Shipping Details
+                    </h6>
+
+                    <div id="existing-addresses" class="mt-3">
+                        <div class="text-muted small">Select a customer to view saved addresses...</div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="button" id="toggle-new-address" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add New Address
+                        </button>
+                    </div>
+
+                    <div id="new-address-form" class="border rounded-3 p-3 mt-3 bg-light shadow-sm" style="display: none;">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Recipient Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="shipping_name" class="form-control shadow-sm"
+                                    placeholder="Full name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                                <input type="text" name="shipping_phone" class="form-control shadow-sm"
+                                    placeholder="Phone number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" name="shipping_email" class="form-control shadow-sm"
+                                    placeholder="Optional email">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Landmark</label>
+                                <input type="text" name="landmark" class="form-control shadow-sm"
+                                    placeholder="Nearby landmark">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 1 <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="address_line1" class="form-control shadow-sm"
+                                    placeholder="House No, Street">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 2</label>
+                                <input type="text" name="address_line2" class="form-control shadow-sm"
+                                    placeholder="Apartment, Building">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                <input type="text" name="city" class="form-control shadow-sm">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                <input type="text" name="state" class="form-control shadow-sm">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="postal_code" class="form-control shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <h6 class="fw-bold border-bottom pb-2 mt-4 text-primary">
+                        <i class="bi bi-cart4 me-2"></i> Order Items
+                    </h6>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle mb-0" id="order-items-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 55%;">Product <span class="text-danger">*</span></th>
+                                    <th style="width: 25%;">Quantity <span class="text-danger">*</span></th>
+                                    <th style="width: 20%;" class="text-center">Add / Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items-body">
+                                <tr class="order-item">
+                                    <td>
+                                        <select name="product_id[]" class="form-select form-select-sm shadow-sm" required>
+                                            <option value="">-- Select Product --</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="quantity[]"
+                                            class="form-control form-control-sm shadow-sm" min="1" value="1"
+                                            required>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-success add-item rounded-circle">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-journal-text me-1 text-primary"></i> Order Notes
+                    </label>
+                    <textarea name="notes" class="form-control shadow-sm" rows="3"
+                        placeholder="Any special instructions or remarks..."></textarea>
+                </div>
+
+                <div class="col-md-4 mt-4">
+                    <label class="form-label fw-semibold">Order Status</label>
+                    <select name="order_status" class="form-select" required>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button type="reset" class="btn btn-light">Reset</button>
+            <button type="submit" id="createOrderBtn" class="btn btn-success">
+                <i class="bi bi-check-lg"></i> Create Order
+            </button>
+        </div>
+    </form> --}}
+
+    <form id="orderCreateForm" action="{{ route('admin.orders.store') }}" method="POST" class="card shadow-sm border-0">
+        @csrf
+        <div class="card-body">
+            <div class="row g-4">
+
+                <!-- Customer Selection -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Select Customer <span class="text-danger">*</span></label>
+                    <select name="user_id" class="form-select @error('user_id') is-invalid @enderror" required>
+                        <option value="">-- Choose Customer --</option>
+                        @foreach ($customers as $customer)
+                            <option value="{{ $customer->id }}" {{ old('user_id') == $customer->id ? 'selected' : '' }}>
+                                {{ $customer->full_name }} ({{ $customer->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('user_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Payment Method -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Payment Method <span class="text-danger">*</span></label>
+                    <select name="payment_method" class="form-select @error('payment_method') is-invalid @enderror"
+                        required>
+                        <option value="cod" {{ old('payment_method') == 'cod' ? 'selected' : '' }}>Cash on Delivery
+                        </option>
+                        <option value="online" {{ old('payment_method') == 'online' ? 'selected' : '' }}>Online Payment
+                        </option>
+                    </select>
+                    @error('payment_method')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Payment Status -->
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Payment Status <span class="text-danger">*</span></label>
+                    <select name="payment_status" class="form-select @error('payment_status') is-invalid @enderror"
+                        required>
+                        <option value="pending" {{ old('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="paid" {{ old('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                        <option value="failed" {{ old('payment_status') == 'failed' ? 'selected' : '' }}>Failed</option>
+                    </select>
+                    @error('payment_status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Shipping Details -->
+                <div class="col-12">
+                    <h6 class="fw-bold border-bottom pb-2 mt-3 text-primary">
+                        <i class="bi bi-geo-alt-fill me-2"></i> Shipping Details
+                    </h6>
+
+                    <div id="existing-addresses" class="mt-3">
+                        <div class="text-muted small">Select a customer to view saved addresses...</div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="button" id="toggle-new-address" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add New Address
+                        </button>
+                    </div>
+
+                    <div id="new-address-form" class="border rounded-3 p-3 mt-3 bg-light shadow-sm" style="display: none;">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Recipient Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="shipping_name" value="{{ old('shipping_name') }}"
+                                    class="form-control shadow-sm @error('shipping_name') is-invalid @enderror"
+                                    placeholder="Full name">
+                                @error('shipping_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+                                <input type="text" name="shipping_phone" value="{{ old('shipping_phone') }}"
+                                    class="form-control shadow-sm @error('shipping_phone') is-invalid @enderror"
+                                    placeholder="Phone number">
+                                @error('shipping_phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" name="shipping_email" value="{{ old('shipping_email') }}"
+                                    class="form-control shadow-sm @error('shipping_email') is-invalid @enderror"
+                                    placeholder="Optional email">
+                                @error('shipping_email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Landmark</label>
+                                <input type="text" name="landmark" value="{{ old('landmark') }}"
+                                    class="form-control shadow-sm @error('landmark') is-invalid @enderror"
+                                    placeholder="Nearby landmark">
+                                @error('landmark')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 1 <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="address_line1" value="{{ old('address_line1') }}"
+                                    class="form-control shadow-sm @error('address_line1') is-invalid @enderror"
+                                    placeholder="House No, Street">
+                                @error('address_line1')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 2</label>
+                                <input type="text" name="address_line2" value="{{ old('address_line2') }}"
+                                    class="form-control shadow-sm @error('address_line2') is-invalid @enderror"
+                                    placeholder="Apartment, Building">
+                                @error('address_line2')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                <input type="text" name="city" value="{{ old('city') }}"
+                                    class="form-control shadow-sm @error('city') is-invalid @enderror">
+                                @error('city')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                                <input type="text" name="state" value="{{ old('state') }}"
+                                    class="form-control shadow-sm @error('state') is-invalid @enderror">
+                                @error('state')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" name="postal_code" value="{{ old('postal_code') }}"
+                                    class="form-control shadow-sm @error('postal_code') is-invalid @enderror">
+                                @error('postal_code')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="col-12">
+                    <h6 class="fw-bold border-bottom pb-2 mt-4 text-primary">
+                        <i class="bi bi-cart4 me-2"></i> Order Items
+                    </h6>
+
+                    <div class="table-responsive mt-3">
+                        <table class="table align-middle mb-0" id="order-items-table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 55%;">Product <span class="text-danger">*</span></th>
+                                    <th style="width: 25%;">Quantity <span class="text-danger">*</span></th>
+                                    <th style="width: 20%;" class="text-center">Add / Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-items-body">
+                                <tr class="order-item">
+                                    <td>
+                                        <select name="product_id[]"
+                                            class="form-select form-select-sm shadow-sm @error('product_id.*') is-invalid @enderror"
+                                            required>
+                                            <option value="">-- Select Product --</option>
+                                            @foreach ($products as $product)
+                                                <option value="{{ $product->id }}"
+                                                    {{ old('product_id.0') == $product->id ? 'selected' : '' }}>
+                                                    {{ $product->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('product_id.*')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
+                                    <td>
+                                        <input type="number" name="quantity[]" min="1"
+                                            value="{{ old('quantity.0', 1) }}"
+                                            class="form-control form-control-sm shadow-sm @error('quantity.*') is-invalid @enderror"
+                                            required>
+                                        @error('quantity.*')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-success add-item rounded-circle">
+                                            <i class="bi bi-plus-circle"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="col-12 mt-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-journal-text me-1 text-primary"></i> Order Notes
+                    </label>
+                    <textarea name="notes" class="form-control shadow-sm @error('notes') is-invalid @enderror" rows="3"
+                        placeholder="Any special instructions or remarks...">{{ old('notes') }}</textarea>
+                    @error('notes')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Order Status -->
+                <div class="col-md-4 mt-4">
+                    <label class="form-label fw-semibold">Order Status</label>
+                    <select name="order_status" class="form-select @error('order_status') is-invalid @enderror" required>
+                        <option value="pending" {{ old('order_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="processing" {{ old('order_status') == 'processing' ? 'selected' : '' }}>Processing
+                        </option>
+                        <option value="shipped" {{ old('order_status') == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                        <option value="delivered" {{ old('order_status') == 'delivered' ? 'selected' : '' }}>Delivered
+                        </option>
+                        <option value="cancelled" {{ old('order_status') == 'cancelled' ? 'selected' : '' }}>Cancelled
+                        </option>
+                    </select>
+                    @error('order_status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card-footer d-flex justify-content-end gap-2">
+            <button type="reset" class="btn btn-light">Reset</button>
+            <button type="submit" id="createOrderBtn" class="btn btn-success">
+                <i class="bi bi-check-lg"></i> Create Order
+            </button>
+        </div>
+    </form>
+
+    <div class="modal fade" id="editAddressModal" tabindex="-1" aria-labelledby="editAddressModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h6 class="modal-title" id="editAddressModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i> Edit Shipping Address
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-address-form">
+                        @csrf
+                        @method('POST')
+                        <input type="hidden" name="id" id="edit_address_id">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Recipient Name</label>
+                                <input type="text" class="form-control" name="shipping_name" id="edit_shipping_name"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone</label>
+                                <input type="text" class="form-control" name="shipping_phone"
+                                    id="edit_shipping_phone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control" name="shipping_email"
+                                    id="edit_shipping_email">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Landmark</label>
+                                <input type="text" class="form-control" name="landmark" id="edit_landmark">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 1</label>
+                                <input type="text" class="form-control" name="address_line1" id="edit_address_line1"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Address Line 2</label>
+                                <input type="text" class="form-control" name="address_line2" id="edit_address_line2">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">City</label>
+                                <input type="text" class="form-control" name="city" id="edit_city" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">State</label>
+                                <input type="text" class="form-control" name="state" id="edit_state" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Postal Code</label>
+                                <input type="text" class="form-control" name="postal_code" id="edit_postal_code"
+                                    required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="save-address-changes" class="btn btn-success">
+                        <i class="bi bi-check2"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script src="{{ asset('js/order-create.js') }}"></script>
+    @endpush
+@endsection
