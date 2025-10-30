@@ -82,7 +82,7 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::resource('cancellations', CancellationController::class)->names('admin.cancellations');
     Route::patch('cancellations/{id}/approve', [CancellationController::class, 'approve'])->name('admin.cancellations.approve');
     Route::patch('cancellations/{id}/reject', [CancellationController::class, 'reject'])->name('admin.cancellations.reject');
-    
+
     // Customers
     Route::resource('customers', CustomerController::class)->names('admin.customers');
     Route::post('customers/bulk-delete', [CustomerController::class, 'bulkDelete'])->name('admin.customers.bulkDelete');
@@ -116,9 +116,15 @@ Route::prefix('admin')->middleware('admin.auth')->group(function () {
     Route::post('seo/settings/update', [SEOController::class, 'update'])->name('admin.seo.update');
 
     // Support & Tickets
-    // Route::get('support/seller', [SupportController::class, 'seller'])->name('admin.support.seller');
+    Route::get('support/seller', [SupportController::class, 'seller'])->name('admin.support.seller');
     Route::resource('seller-supports', SellerSupportController::class)->names('admin.seller-supports');
+    Route::get('products/{productId}/reviews', [SellerSupportController::class, 'searchReview']);
+
+    Route::get('/seller-supports/{id}/messages', [SellerSupportController::class, 'getMessages'])->name('seller-supports.messages');
+    Route::post('/seller-supports/{id}/messages', [SellerSupportController::class, 'storeMessage'])->name('seller-supports.messages.store');
     Route::post('seller-supports/{id}/update-status', [SellerSupportController::class, 'updateStatus'])->name('seller-supports.update-status');
+    Route::put('/sellers/{seller}/bank-info', [SellerSupportController::class, 'updateBankInfo'])->name('sellers.updateBankInfo');
+
     Route::get('support/customer', [SupportController::class, 'customer'])->name('admin.support.customer');
     Route::resource('tickets', TicketController::class)->names('admin.tickets');
 });

@@ -12,7 +12,9 @@ class SellerSupport extends Model
         'product_id',
         'subject',
         'message',
-        'status'
+        'status',
+        'closed_by',
+        'reopened_by',
     ];
 
     public function seller()
@@ -23,7 +25,7 @@ class SellerSupport extends Model
 
     public function admin()
     {
-        return $this->belongsTo(AdminUser::class);
+        return $this->belongsTo(AdminUser::class, 'admin_id');
     }
 
     public function product()
@@ -41,5 +43,19 @@ class SellerSupport extends Model
     {
         return $this->hasOne(ProductImage::class, 'product_id', 'product_id')
             ->where('is_primary', 1);
+    }
+    public function messages()
+    {
+        return $this->hasMany(SupportMessage::class);
+    }
+
+    public function closedBy()
+    {
+        return $this->belongsTo(AdminUser::class, 'closed_by');
+    }
+
+    public function reopenedBy()
+    {
+        return $this->belongsTo(AdminUser::class, 'reopened_by');
     }
 }
